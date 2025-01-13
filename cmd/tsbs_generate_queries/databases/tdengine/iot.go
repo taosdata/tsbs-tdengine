@@ -73,7 +73,7 @@ func (i *IoT) TrucksWithLowFuel(qi query.Query) {
 	i.fillInQuery(qi, humanLabel, humanDesc, iot.DiagnosticsTableName, sql)
 }
 
-//TrucksWithHighLoad finds all trucks that have load over 90%.
+// TrucksWithHighLoad finds all trucks that have load over 90%.
 func (i *IoT) TrucksWithHighLoad(qi query.Query) {
 	//SELECT ts,name,driver,current_load,load_capacity FROM (SELECT last_row(ts) as ts,name,driver, current_load,load_capacity FROM diagnostics WHERE fleet = 'South' partition by name,driver) WHERE current_load>= (0.9 * load_capacity);
 	//pre sql := fmt.Sprintf("SELECT ts,name,driver,current_load,load_capacity FROM (SELECT last_row(ts) as ts,name,driver, current_load,load_capacity FROM diagnostics WHERE fleet = '%s' partition by name,driver) WHERE current_load>= (0.9 * load_capacity)", i.GetRandomFleet())

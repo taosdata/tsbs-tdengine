@@ -1,3 +1,13 @@
+# Installation
+**`Notice`**
+
+TDengine uses the go connector to perform data writing and querying in the 
+TSBS test, and the installation process relies on the C client library. 
+Therefore, prior to compiling TSBS, the taos client must be installed to 
+obtain the necessary library files. For instructions on how to install the 
+taos client and server, refer to the [TDengine documentation](https://docs.tdengine.com/get-started/deploy-from-package/) .
+
+
 # TSBS Supplemental Guide: TDengine
 
 TDengine is an open source time-series database with high performance, scalability and SQL support. 

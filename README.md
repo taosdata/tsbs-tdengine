@@ -107,13 +107,6 @@ with identical data and queried using identical queries.
 TSBS is a collection of Go programs (with some auxiliary bash and Python
 scripts).
 
-**`Notice`**
-
-TDengine uses the go connector to perform data writing and querying in the 
-TSBS test, and the installation process relies on the C client library. 
-Therefore, prior to compiling TSBS, the taos client must be installed to 
-obtain the necessary library files. For instructions on how to install the 
-taos client and server, refer to the [TDengine documentation](https://docs.tdengine.com/get-started/package/) .
 
 The easiest way to get and install the Go programs is to use
 `go get` and then `make all` to install all binaries:
@@ -123,6 +116,10 @@ $ go get github.com/timescale/tsbs
 $ cd $GOPATH/src/github.com/timescale/tsbs
 $ make
 ```
+
+**`Notice`**
+
+The make process will failed if the TDengine client isn't installed. Please refer to the [supplementary documentation for TDengine](docs/tdengine.md).
 
 ## How to use TSBS
 

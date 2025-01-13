@@ -14,7 +14,6 @@ import (
 	"github.com/timescale/tsbs/pkg/targets/questdb"
 	"github.com/timescale/tsbs/pkg/targets/siridb"
 	"github.com/timescale/tsbs/pkg/targets/tdengine"
-	"github.com/timescale/tsbs/pkg/targets/tdenginesml"
 	"github.com/timescale/tsbs/pkg/targets/timescaledb"
 	"github.com/timescale/tsbs/pkg/targets/timestream"
 	"github.com/timescale/tsbs/pkg/targets/victoriametrics"
@@ -49,8 +48,6 @@ func GetTarget(format string) targets.ImplementedTarget {
 		return questdb.NewTarget()
 	case constants.FormatTDengine:
 		return tdengine.NewTarget()
-	case constants.FormatTDengineSML:
-		return tdenginesml.NewTarget()
 	}
 
 	supportedFormatsStr := strings.Join(constants.SupportedFormats(), ",")
