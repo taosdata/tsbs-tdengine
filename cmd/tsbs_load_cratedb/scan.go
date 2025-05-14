@@ -60,8 +60,7 @@ type fileDataSource struct {
 // source.DataSource interface implementation
 //
 // Decodes a data point of a following format:
-//
-//	<measurement_type>\t<tags>\t<timestamp>\t<metric1>\t...\t<metricN>
+//       <measurement_type>\t<tags>\t<timestamp>\t<metric1>\t...\t<metricN>
 //
 // Converts metric values to double-precision floating-point number, timestamp
 // to time.Time and tags to bytes array.
