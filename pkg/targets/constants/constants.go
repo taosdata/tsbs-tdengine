@@ -14,7 +14,6 @@ const (
 	FormatVictoriaMetrics = "victoriametrics"
 	FormatTimestream      = "timestream"
 	FormatQuestDB         = "questdb"
-	FormatTDengine        = "TDengine"
 )
 
 func SupportedFormats() []string {
@@ -31,6 +30,5 @@ func SupportedFormats() []string {
 		FormatVictoriaMetrics,
 		FormatTimestream,
 		FormatQuestDB,
-		FormatTDengine,
 	}
 }

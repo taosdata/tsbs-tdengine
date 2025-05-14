@@ -28,8 +28,7 @@ const hostnameField = "tags['hostname']"
 // a set of column idents.
 //
 // For instance:
-//
-//	max(cpu_time) AS max_cpu_time
+//      max(cpu_time) AS max_cpu_time
 func (d *Devops) getSelectAggClauses(aggFunc string, idents []string) []string {
 	selectAggClauses := make([]string, len(idents))
 	for i, ident := range idents {

@@ -26,8 +26,7 @@ loaders: tsbs_load \
  		 tsbs_load_siridb \
  		 tsbs_load_timescaledb \
  		 tsbs_load_victoriametrics \
-		 tsbs_load_questdb \
- 		 tsbs_load_tdengine
+ 		 tsbs_load_questdb
 
 runners: tsbs_run_queries_akumuli \
 		 tsbs_run_queries_cassandra \
@@ -39,8 +38,7 @@ runners: tsbs_run_queries_akumuli \
 		 tsbs_run_queries_timescaledb \
 		 tsbs_run_queries_timestream \
 		 tsbs_run_queries_victoriametrics \
-		 tsbs_run_queries_questdb \
-		 tsbs_run_queries_tdengine
+		 tsbs_run_queries_questdb
 
 test:
 	$(GOTEST) -v ./...

@@ -9,7 +9,6 @@ import (
 	"github.com/timescale/tsbs/cmd/tsbs_generate_queries/databases/mongo"
 	"github.com/timescale/tsbs/cmd/tsbs_generate_queries/databases/questdb"
 	"github.com/timescale/tsbs/cmd/tsbs_generate_queries/databases/siridb"
-	"github.com/timescale/tsbs/cmd/tsbs_generate_queries/databases/tdengine"
 	"github.com/timescale/tsbs/cmd/tsbs_generate_queries/databases/timescaledb"
 	"github.com/timescale/tsbs/cmd/tsbs_generate_queries/databases/timestream"
 	"github.com/timescale/tsbs/cmd/tsbs_generate_queries/databases/victoriametrics"
@@ -40,6 +39,5 @@ func InitQueryFactories(config *config.QueryGeneratorConfig) map[string]interfac
 		DBName: config.DbName,
 	}
 	factories[constants.FormatQuestDB] = &questdb.BaseGenerator{}
-	factories[constants.FormatTDengine] = &tdengine.BaseGenerator{}
 	return factories
 }

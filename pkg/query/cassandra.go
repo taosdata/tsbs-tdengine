@@ -26,7 +26,7 @@ type Cassandra struct {
 	TagSets         [][]string // semantically, each subgroup is OR'ed and they are all AND'ed together
 }
 
-// CassandraPool is a sync.Pool of Cassandra Query types
+//CassandraPool is a sync.Pool of Cassandra Query types
 var CassandraPool = sync.Pool{
 	New: func() interface{} {
 		return &Cassandra{
