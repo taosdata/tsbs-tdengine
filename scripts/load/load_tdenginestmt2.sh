@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Ensure loader is available
-EXE_FILE_NAME_LOAD_DATA=${EXE_FILE_NAME_LOAD_DATA:-$(which tsbs_load_tdengine)}
+EXE_FILE_NAME_LOAD_DATA=${EXE_FILE_NAME_LOAD_DATA:-$(which tsbs_load_tdenginestmt2)}
 if [[ -z "$EXE_FILE_NAME_LOAD_DATA" ]]; then
-    echo "tsbs_load_tdengine is not available. It is not specified explicitly and not found in \$PATH"
+    echo "tsbs_load_tdenginestmt2 is not available. It is not specified explicitly and not found in \$PATH"
     exit 1
 fi
 
 # Load parameters - common
-DATA_FILE_NAME=${DATA_FILE_NAME:-TDengine-data.gz}
+DATA_FILE_NAME=${DATA_FILE_NAME:-TDengineStmt2-data.gz}
 DATABASE_NAME=${DATABASE_NAME:-benchmark}
 DATABASE_HOST=${DATABASE_HOST:-localhost}
 DATABASE_TAOS_PORT=${DATABASE_TAOS_PORT:-6030}
