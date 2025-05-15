@@ -8,7 +8,7 @@ MAX_QUERIES=${MAX_QUERIES:-"1000"}
 
 mkdir -p /tmp/bulk_data
 
-# generate queries
+# generate data
 $GOPATH/bin/tsbs_generate_data --format TDengine --use-case cpu-only --scale 10 --seed 123 --file /tmp/bulk_data/tdengine_data
 
 # generate queries
