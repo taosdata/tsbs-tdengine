@@ -15,6 +15,7 @@ const (
 	FormatTimestream      = "timestream"
 	FormatQuestDB         = "questdb"
 	FormatTDengine        = "TDengine"
+	FormatTDengineStmt2   = "TDengineStmt2"
 )
 
 func SupportedFormats() []string {
@@ -32,5 +33,6 @@ func SupportedFormats() []string {
 		FormatTimestream,
 		FormatQuestDB,
 		FormatTDengine,
+		FormatTDengineStmt2,
 	}
 }

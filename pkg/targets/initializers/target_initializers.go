@@ -2,6 +2,8 @@ package initializers
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/timescale/tsbs/pkg/targets"
 	"github.com/timescale/tsbs/pkg/targets/akumuli"
 	"github.com/timescale/tsbs/pkg/targets/cassandra"
@@ -14,10 +16,10 @@ import (
 	"github.com/timescale/tsbs/pkg/targets/questdb"
 	"github.com/timescale/tsbs/pkg/targets/siridb"
 	"github.com/timescale/tsbs/pkg/targets/tdengine"
+	"github.com/timescale/tsbs/pkg/targets/tdenginestmt2"
 	"github.com/timescale/tsbs/pkg/targets/timescaledb"
 	"github.com/timescale/tsbs/pkg/targets/timestream"
 	"github.com/timescale/tsbs/pkg/targets/victoriametrics"
-	"strings"
 )
 
 func GetTarget(format string) targets.ImplementedTarget {
@@ -48,6 +50,8 @@ func GetTarget(format string) targets.ImplementedTarget {
 		return questdb.NewTarget()
 	case constants.FormatTDengine:
 		return tdengine.NewTarget()
+	case constants.FormatTDengineStmt2:
+		return tdenginestmt2.NewTarget()
 	}
 
 	supportedFormatsStr := strings.Join(constants.SupportedFormats(), ",")
