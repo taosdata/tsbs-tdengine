@@ -62,7 +62,7 @@ Specifies the port of the TDengine server.
 
 TDengine provides several parameters for creating a database. See the [TDengine documentation][conn-str] for more details.
 
-#### `-buffer` (type: `int`, default: `96`)
+#### `-buffer` (type: `int`, default: `256`)
 
 Specifies the size (in MB) of the write buffer for each vnode. Enter a value between 3 and 16384.
 
