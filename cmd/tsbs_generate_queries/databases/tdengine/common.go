@@ -9,8 +9,24 @@ import (
 	"github.com/timescale/tsbs/pkg/query"
 )
 
-// BaseGenerator contains settings specific for Influx database.
+// BaseGenerator contains TDengine query-generation options.
 type BaseGenerator struct {
+	UseFastInterval  bool
+	UseIntervalLimit bool
+}
+
+func (g *BaseGenerator) fastIntervalHint() string {
+	if g.UseFastInterval {
+		return "/*+ FAST_INTERVAL() */ "
+	}
+	return ""
+}
+
+func (g *BaseGenerator) intervalLimitHint() string {
+	if g.UseIntervalLimit {
+		return "/*+ INTERVAL_LIMIT() */ "
+	}
+	return ""
 }
 
 func (g *BaseGenerator) GenerateEmptyQuery() query.Query {

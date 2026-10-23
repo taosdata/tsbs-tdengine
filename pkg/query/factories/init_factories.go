@@ -40,6 +40,9 @@ func InitQueryFactories(config *config.QueryGeneratorConfig) map[string]interfac
 		DBName: config.DbName,
 	}
 	factories[constants.FormatQuestDB] = &questdb.BaseGenerator{}
-	factories[constants.FormatTDengine] = &tdengine.BaseGenerator{}
+	factories[constants.FormatTDengine] = &tdengine.BaseGenerator{
+		UseFastInterval:  config.TDengineUseFastInterval,
+		UseIntervalLimit: config.TDengineUseIntervalLimit,
+	}
 	return factories
 }

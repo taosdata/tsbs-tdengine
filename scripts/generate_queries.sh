@@ -15,6 +15,8 @@ BULK_DATA_DIR=${BULK_DATA_DIR:-"/tmp/bulk_queries"}
 USE_JSON=${USE_JSON:-false}
 USE_TAGS=${USE_TAGS:-true}
 USE_TIME_BUCKET=${USE_TIME_BUCKET:-true}
+TDENGINE_USE_FAST_INTERVAL=${TDENGINE_USE_FAST_INTERVAL:-false}
+TDENGINE_USE_INTERVAL_LIMIT=${TDENGINE_USE_INTERVAL_LIMIT:-false}
 
 # Space-separated list of target DB formats to generate
 FORMATS=${FORMATS:-"timescaledb"}
@@ -67,6 +69,10 @@ set -eo pipefail
 for QUERY_TYPE in ${QUERY_TYPES}; do
     for FORMAT in ${FORMATS}; do
         DATA_FILE_NAME="queries_${FORMAT}_${QUERY_TYPE}_${EXE_FILE_VERSION}_${QUERIES}_${SCALE}_${SEED}_${TS_START}_${TS_END}_${USE_CASE}.dat.gz"
+        # Keep optimized query files separate from the unhinted baseline.
+        if [[ "$FORMAT" == "TDengine" ]] && [[ "$TDENGINE_USE_FAST_INTERVAL" != false || "$TDENGINE_USE_INTERVAL_LIMIT" != false ]]; then
+            DATA_FILE_NAME="${DATA_FILE_NAME%.dat.gz}_fast-${TDENGINE_USE_FAST_INTERVAL}_interval-limit-${TDENGINE_USE_INTERVAL_LIMIT}.dat.gz"
+        fi
         if [ -f "${DATA_FILE_NAME}" ]; then
             echo "WARNING: file ${DATA_FILE_NAME} already exists, skip generating new data"
         else
@@ -90,19 +96,21 @@ for QUERY_TYPE in ${QUERY_TYPES}; do
                 --timescale-use-tags=${USE_TAGS} \
                 --timescale-use-time-bucket=${USE_TIME_BUCKET} \
                 --clickhouse-use-tags=${USE_TAGS} \
+                --tdengine-use-fast-interval=${TDENGINE_USE_FAST_INTERVAL} \
+                --tdengine-use-interval-limit=${TDENGINE_USE_INTERVAL_LIMIT} \
             | gzip  > ${DATA_FILE_NAME}
 
             trap - EXIT
-            # Make short symlink for convenience
-            SYMLINK_NAME="${FORMAT}-${QUERY_TYPE}-queries.gz"
-
-            rm -f ${SYMLINK_NAME} 2> /dev/null
-            ln -s ${DATA_FILE_NAME} ${SYMLINK_NAME}
-
-            # Make files accessible by everyone
-            chmod a+r ${DATA_FILE_NAME} ${SYMLINK_NAME}
-
-            ls -lh ${SYMLINK_NAME}
         fi
+        # Select this variant even if its data file was generated earlier.
+        SYMLINK_NAME="${FORMAT}-${QUERY_TYPE}-queries.gz"
+
+        rm -f ${SYMLINK_NAME} 2> /dev/null
+        ln -s ${DATA_FILE_NAME} ${SYMLINK_NAME}
+
+        # Make files accessible by everyone
+        chmod a+r ${DATA_FILE_NAME} ${SYMLINK_NAME}
+
+        ls -lh ${SYMLINK_NAME}
     done
 done

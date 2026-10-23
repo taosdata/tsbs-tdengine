@@ -102,7 +102,7 @@ func (i *IoT) TrucksWithLongDrivingSessions(qi query.Query) {
 	interval := i.Interval.MustRandWindow(iot.LongDrivingSessionDuration)
 	//SELECT name,driver FROM(SELECT _wstart as ts,name,driver,avg(velocity) as mean_velocity FROM readings WHERE fleet ="West" AND ts > '2016-01-03T13:46:34Z' AND ts <= '2016-01-03T17:46:34Z' partition BY name,driver interval(10m)) WHERE mean_velocity > 1 GROUP BY name,driver having count(*) > 22
 	//pre sql := fmt.Sprintf("SELECT name,driver FROM(SELECT _wstart as ts,name,driver,avg(velocity) as mean_velocity FROM readings WHERE fleet =\"%s\" AND ts > %d AND ts <= %d partition BY name,driver interval(10m)) WHERE mean_velocity > 1 GROUP BY name,driver having count(*) > %d", i.GetRandomFleet(), interval.StartUnixMillis(), interval.EndUnixMillis(), tenMinutePeriods(5, iot.LongDrivingSessionDuration))
-	sql := fmt.Sprintf("SELECT name,driver FROM(SELECT name,driver,avg(velocity) as mean_velocity FROM readings WHERE fleet =\"%s\" AND ts > %d AND ts <= %d partition BY name,driver interval(10m)) WHERE mean_velocity > 1 GROUP BY name,driver having count(*) > %d", i.GetRandomFleet(), interval.StartUnixMillis(), interval.EndUnixMillis(), tenMinutePeriods(5, iot.LongDrivingSessionDuration))
+	sql := fmt.Sprintf("SELECT name,driver FROM(SELECT %sname,driver,avg(velocity) as mean_velocity FROM readings WHERE fleet =\"%s\" AND ts > %d AND ts <= %d partition BY name,driver interval(10m)) WHERE mean_velocity > 1 GROUP BY name,driver having count(*) > %d", i.fastIntervalHint(), i.GetRandomFleet(), interval.StartUnixMillis(), interval.EndUnixMillis(), tenMinutePeriods(5, iot.LongDrivingSessionDuration))
 	humanLabel := "TDengine trucks with longer driving sessions"
 	humanDesc := fmt.Sprintf("%s: stopped less than 20 mins in 4 hour period", humanLabel)
 
@@ -114,7 +114,7 @@ func (i *IoT) TrucksWithLongDailySessions(qi query.Query) {
 	//SELECT name,driver FROM(SELECT name,driver,avg(velocity) as mean_velocity FROM readings WHERE fleet ='West' AND ts > '2016-01-01T12:31:37Z' AND ts <= '2016-01-05T12:31:37Z' partition BY name,driver interval(10m) ) WHERE mean_velocity > 1 GROUP BY name,driver having count(*) > 60
 
 	interval := i.Interval.MustRandWindow(iot.DailyDrivingDuration)
-	sql := fmt.Sprintf("SELECT name,driver FROM(SELECT name,driver,avg(velocity) as mean_velocity FROM readings WHERE fleet ='%s' AND ts > %d AND ts <= %d partition BY name,driver interval(10m) ) WHERE mean_velocity > 1 GROUP BY name,driver having count(*) > %d", i.GetRandomFleet(), interval.StartUnixMillis(), interval.EndUnixMillis(), tenMinutePeriods(35, iot.DailyDrivingDuration))
+	sql := fmt.Sprintf("SELECT name,driver FROM(SELECT %sname,driver,avg(velocity) as mean_velocity FROM readings WHERE fleet ='%s' AND ts > %d AND ts <= %d partition BY name,driver interval(10m) ) WHERE mean_velocity > 1 GROUP BY name,driver having count(*) > %d", i.fastIntervalHint(), i.GetRandomFleet(), interval.StartUnixMillis(), interval.EndUnixMillis(), tenMinutePeriods(35, iot.DailyDrivingDuration))
 
 	humanLabel := "TDengine trucks with longer daily sessions"
 	humanDesc := fmt.Sprintf("%s: drove more than 10 hours in the last 24 hours", humanLabel)
@@ -135,7 +135,7 @@ func (i *IoT) AvgVsProjectedFuelConsumption(qi query.Query) {
 // AvgDailyDrivingDuration finds the average driving duration per driver.
 func (i *IoT) AvgDailyDrivingDuration(qi query.Query) {
 	//select fleet,name,driver,avg(hours_driven) as avg_daily_hours  from( select _wstart as ts,fleet,name,driver,count(mv)/6 as hours_driven from ( select _wstart as ts,fleet,tbname,name,driver,avg(velocity) as mv from readings where ts > '2016-01-01T00:00:00Z' and ts < '2016-01-05T00:00:01Z'  partition by fleet,tbname,name,driver interval(10m)  ) where  mv >1  partition by fleet,name,driver interval(1d) )partition by fleet,name,driver ;
-	sql := fmt.Sprintf("select fleet,name,driver,avg(hours_driven) as avg_daily_hours  from( select _wstart as ts,fleet,name,driver,count(mv)/6 as hours_driven from ( select _wstart as ts,fleet,tbname,name,driver,avg(velocity) as mv from readings where ts > %d and ts < %d  partition by fleet,tbname,name,driver interval(10m)  ) where  mv >1  partition by fleet,name,driver interval(1d) )partition by fleet,name,driver ;", i.Interval.StartUnixMillis(), i.Interval.EndUnixMillis())
+	sql := fmt.Sprintf("select fleet,name,driver,avg(hours_driven) as avg_daily_hours  from( select _wstart as ts,fleet,name,driver,count(mv)/6 as hours_driven from ( select %s_wstart as ts,fleet,tbname,name,driver,avg(velocity) as mv from readings where ts > %d and ts < %d  partition by fleet,tbname,name,driver interval(10m)  ) where  mv >1  partition by fleet,name,driver interval(1d) )partition by fleet,name,driver ;", i.fastIntervalHint(), i.Interval.StartUnixMillis(), i.Interval.EndUnixMillis())
 
 	humanLabel := "TDengine average driver driving duration per day"
 	humanDesc := humanLabel
@@ -147,7 +147,7 @@ func (i *IoT) AvgDailyDrivingDuration(qi query.Query) {
 func (i *IoT) AvgDailyDrivingSession(qi query.Query) {
 	//    select _wstart as ts,name,avg(ela) from (select ts,name,ela from (SELECT ts,name, diff(difka) as dif, diff(cast(ts as bigint)) as ela FROM (SELECT ts,name,difka FROM (SELECT ts,name,diff(mv) AS difka FROM (SELECT _wstart as ts,name,cast(cast(floor(avg(velocity)/5) as bool) as int) AS mv FROM readings WHERE name is not null AND ts > 1451637149138 AND ts < 1451637749138 partition by name interval(10m))partition BY name ) WHERE difka!=0 order by ts) partition BY name order by ts ) WHERE dif = -2   partition BY name order by ts )  partition BY name  interval(1d);
 	interval := i.Interval
-	sql := fmt.Sprintf(" select _wstart as ts,name,avg(ela) from (select ts,name,ela from (SELECT ts,name, diff(difka) as dif, diff(cast(ts as bigint)) as ela FROM (SELECT ts,name,difka FROM (SELECT ts,name,diff(mv) AS difka FROM (SELECT _wstart as ts,name,cast(cast(floor(avg(velocity)/5) as bool) as int) AS mv FROM readings   WHERE name is not null  AND ts > %d AND ts < %d   partition by name interval(10m))partition BY name ) WHERE difka!=0   order by ts) partition BY name order by ts ) WHERE dif = -2   partition BY name order by ts )  partition BY name  interval(1d);", interval.StartUnixMillis(), interval.EndUnixMillis())
+	sql := fmt.Sprintf(" select _wstart as ts,name,avg(ela) from (select ts,name,ela from (SELECT ts,name, diff(difka) as dif, diff(cast(ts as bigint)) as ela FROM (SELECT ts,name,difka FROM (SELECT ts,name,diff(mv) AS difka FROM (SELECT %s_wstart as ts,name,cast(cast(floor(avg(velocity)/5) as bool) as int) AS mv FROM readings   WHERE name is not null  AND ts > %d AND ts < %d   partition by name interval(10m))partition BY name ) WHERE difka!=0   order by ts) partition BY name order by ts ) WHERE dif = -2   partition BY name order by ts )  partition BY name  interval(1d);", i.fastIntervalHint(), interval.StartUnixMillis(), interval.EndUnixMillis())
 	humanLabel := "TDengine average driver driving session without stopping per day"
 	humanDesc := humanLabel
 
@@ -168,7 +168,7 @@ func (i *IoT) AvgLoad(qi query.Query) {
 // DailyTruckActivity returns the number of hours trucks has been active (not out-of-commission) per day per fleet per model.
 func (i *IoT) DailyTruckActivity(qi query.Query) {
 	//SELECT _wstart as ts,model,fleet,count(ms1)/144 FROM (SELECT _wstart as ts1,model, fleet,avg(status) AS ms1 FROM diagnostics WHERE ts >= 1451606400000 AND ts < 1451952001000 partition by model, fleet, tbname interval(10m)) WHERE ms1<1 partition by model, fleet interval(1d)
-	sql := fmt.Sprintf("SELECT _wstart as ts,model,fleet,count(ms1)/144 FROM (SELECT _wstart as ts1,model, fleet,avg(status) AS ms1 FROM diagnostics WHERE ts >= %d AND ts < %d partition by model, fleet, tbname interval(10m)) WHERE ms1<1 partition by model, fleet interval(1d)", i.Interval.StartUnixMillis(), i.Interval.EndUnixMillis())
+	sql := fmt.Sprintf("SELECT _wstart as ts,model,fleet,count(ms1)/144 FROM (SELECT %s_wstart as ts1,model, fleet,avg(status) AS ms1 FROM diagnostics WHERE ts >= %d AND ts < %d partition by model, fleet, tbname interval(10m)) WHERE ms1<1 partition by model, fleet interval(1d)", i.fastIntervalHint(), i.Interval.StartUnixMillis(), i.Interval.EndUnixMillis())
 	humanLabel := "TDengine daily truck activity per fleet per model"
 	humanDesc := humanLabel
 
@@ -178,7 +178,7 @@ func (i *IoT) DailyTruckActivity(qi query.Query) {
 // TruckBreakdownFrequency calculates the amount of times a truck model broke down in the last period.
 func (i *IoT) TruckBreakdownFrequency(qi query.Query) {
 	// SELECT model,count(state_changed) FROM (SELECT _rowts,model,diff(broken_down) AS state_changed FROM (SELECT model,tb,cast(cast(floor(2*(nzs)) as bool) as int) AS broken_down FROM (SELECT _wstart as ts,model,tbname as tb, sum(cast(cast(status as bool) as int))/count(cast(cast(status as bool) as int)) AS nzs FROM diagnostics WHERE ts >= '2016-01-01T00:00:00Z' AND ts < '2023-01-05T00:00:01Z'  partition BY tbname,model interval(10m)) order by ts )  partition BY tb,model )  WHERE state_changed = 1  partition BY model ;
-	sql := fmt.Sprintf("SELECT model,count(state_changed) FROM (SELECT _rowts,model,diff(broken_down) AS state_changed FROM (SELECT ts,model,tb,cast(cast(floor(2*(nzs)) as bool) as int) AS broken_down FROM (SELECT _wstart as ts,model,tbname as tb, sum(cast(cast(status as bool) as int))/count(cast(cast(status as bool) as int)) AS nzs FROM diagnostics WHERE ts >= %d AND ts < %d partition BY tbname,model interval(10m)) order by ts) partition BY tb,model) WHERE state_changed = 1 partition BY model", i.Interval.StartUnixMillis(), i.Interval.EndUnixMillis())
+	sql := fmt.Sprintf("SELECT model,count(state_changed) FROM (SELECT _rowts,model,diff(broken_down) AS state_changed FROM (SELECT ts,model,tb,cast(cast(floor(2*(nzs)) as bool) as int) AS broken_down FROM (SELECT %s_wstart as ts,model,tbname as tb, sum(cast(cast(status as bool) as int))/count(cast(cast(status as bool) as int)) AS nzs FROM diagnostics WHERE ts >= %d AND ts < %d partition BY tbname,model interval(10m)) order by ts) partition BY tb,model) WHERE state_changed = 1 partition BY model", i.fastIntervalHint(), i.Interval.StartUnixMillis(), i.Interval.EndUnixMillis())
 
 	humanLabel := "TDengine truck breakdown frequency per model"
 	humanDesc := humanLabel

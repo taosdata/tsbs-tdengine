@@ -15,11 +15,12 @@ import (
 )
 
 var (
-	user   string
-	pass   string
-	host   string
-	port   int
-	runner *query.BenchmarkRunner
+	user             string
+	pass             string
+	host             string
+	port             int
+	querySmaOptimize int
+	runner           *query.BenchmarkRunner
 )
 
 func init() {
@@ -30,6 +31,7 @@ func init() {
 	pflag.String("pass", "taosdata", "Password for the user connecting to TDengine")
 	pflag.String("host", "", "TDengine host")
 	pflag.Int("port", 6030, "TDengine Port")
+	pflag.Int("query-sma-optimize", -1, "TSMA query optimization: -1 preserves the client setting, 0 disables, 1 enables")
 	pflag.Parse()
 	err := utils.SetupConfigFile()
 
@@ -43,6 +45,10 @@ func init() {
 	pass = viper.GetString("pass")
 	host = viper.GetString("host")
 	port = viper.GetInt("port")
+	querySmaOptimize = viper.GetInt("query-sma-optimize")
+	if querySmaOptimize < -1 || querySmaOptimize > 1 {
+		panic("query-sma-optimize must be -1, 0, or 1")
+	}
 	runner = query.NewBenchmarkRunner(config)
 }
 func main() {
@@ -69,6 +75,13 @@ func (p *processor) Init(workerNum int) {
 	err = async.GlobalAsync.TaosExecWithoutResult(db.TaosConnection, "use "+dbName)
 	if err != nil {
 		panic(err)
+	}
+	if querySmaOptimize >= 0 {
+		err = async.GlobalAsync.TaosExecWithoutResult(db.TaosConnection,
+			fmt.Sprintf("ALTER LOCAL 'querySmaOptimize' '%d'", querySmaOptimize))
+		if err != nil {
+			panic(err)
+		}
 	}
 	p.db = db
 	p.opts = &queryExecutorOptions{

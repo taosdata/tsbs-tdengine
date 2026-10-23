@@ -25,6 +25,9 @@ type QueryGeneratorConfig struct {
 	TimescaleUseTags       bool `mapstructure:"timescale-use-tags"`
 	TimescaleUseTimeBucket bool `mapstructure:"timescale-use-time-bucket"`
 
+	TDengineUseFastInterval  bool `mapstructure:"tdengine-use-fast-interval"`
+	TDengineUseIntervalLimit bool `mapstructure:"tdengine-use-interval-limit"`
+
 	ClickhouseUseTags bool `mapstructure:"clickhouse-use-tags"`
 
 	MongoUseNaive bool   `mapstructure:"mongo-use-native"`
@@ -61,6 +64,9 @@ func (c *QueryGeneratorConfig) AddToFlagSet(fs *pflag.FlagSet) {
 	fs.Bool("timescale-use-json", false, "TimescaleDB only: Use separate JSON tags table when querying")
 	fs.Bool("timescale-use-tags", true, "TimescaleDB only: Use separate tags table when querying")
 	fs.Bool("timescale-use-time-bucket", true, "TimescaleDB only: Use time bucket. Set to false to test on native PostgreSQL")
+
+	fs.Bool("tdengine-use-fast-interval", false, "TDengine only: request FAST_INTERVAL for supported window query types")
+	fs.Bool("tdengine-use-interval-limit", false, "TDengine only: request INTERVAL_LIMIT for groupby-orderby-limit")
 
 	fs.String("db-name", "benchmark", "Specify database name. Timestream requires it in order to generate the queries")
 }
